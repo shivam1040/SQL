@@ -1,0 +1,61 @@
+//Q1. Create Cursor to read AuthorName from Book Table and print how many rows cursor fetched.
+DECLARE CURSOR TestCursor1
+			IS
+			SELECT BookId FROM Book;
+			author Book.FkAuthorId%TYPE;
+			counts INT := 10;
+			BEGIN
+			OPEN TestCursor1;
+			
+			LOOP
+				FETCH TestCursor1 INTO author;
+			
+				IF TestCursor1%NOTFOUND THEN
+					EXIT;
+				END IF;
+				
+				IF FkAuthorId IS NOT NULL THEN	
+				dbms_output.put_line('Book Record Fetched :' || author);
+				counts := counts + 1;
+				END IF;
+				
+			END LOOP;
+			
+				dbms_output.put_line('Total rows fetched are :', counts);
+			
+			CLOSE TestCursor1;
+
+			END;
+
+
+
+
+/* Assignment: Write Cursor to delete Author records if number of books for that author is less than or equal to 1 */
+DECLARE CURSOR TestCursor1
+			IS
+			SELECT A.AuthorName, COUNT(B.BookName) AS counts
+            FROM Author A
+            JOIN Book B ON A.AuthorID = B.FKAuthorID
+            GROUP BY A.AuthorName;
+			author Book.FkAuthorId%TYPE;
+			counts INT := 10;
+			BEGIN
+			OPEN TestCursor1;
+			
+			LOOP
+				FETCH TestCursor1 INTO author;
+			
+				IF TestCursor1%NOTFOUND THEN
+					EXIT;
+				END IF;
+				
+				IF counts<=1 THEN	
+				DELETE FROM Author WHERE AuthorName=A.AuthorName;
+				END IF;
+				
+			END LOOP;
+			
+			
+			CLOSE TestCursor1;
+
+			END;

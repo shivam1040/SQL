@@ -1,0 +1,77 @@
+#Q2
+CREATE TABLE Category(
+    	CategoryId INT PRIMARY KEY,
+	CategoryName VARCHAR(100) NOT NULL
+);
+
+#Q2
+CREATE TABLE Product(
+    	ProdId INT PRIMARY KEY,
+	ProdName VARCHAR(100) UNIQUE,
+	Qtys INT DEFAULT 1,
+	Price DECIMAL(10,2) NOT NULL,
+	Discount DECIMAL(10,2) NOT NULL,
+	Total DECIMAL(10,2) AS ((Price-Discount)*Qtys)
+
+#Q2
+CREATE TABLE Stock(
+    	StockId	INT PRIMARY KEY,
+	FkCatagoryId INT NOT NULL,
+	FkProdId INT NOT NULL
+	FOREIGN KEY(FkCatagoryId) REFERENCES Category(CategoryId)
+	FOREIGN KEY(FkProdId) REFERENCES Product(ProdId)
+);
+
+#QS1
+INSERT ALL 
+   INTO Category(CategoryId, CategoryName) VALUES(1, 'A') 
+   INTO Category(CategoryId, CategoryName) VALUES(2, 'B') 
+   INTO Category(CategoryId, CategoryName) VALUES(3, 'C') 
+   INTO Category(CategoryId, CategoryName) VALUES(4, 'D') 
+SELECT 1 FROM dual
+
+#QS2
+INSERT ALL 
+   INTO Product(ProdId, ProdName, Qtys, Price, Discount, Total) VALUES(5, 'E', 1, 10.00, 1.00)
+   INTO Product(ProdId, ProdName, Qtys, Price, Discount, Total) VALUES(6, 'F', 2, 20.00, 2.00) 
+   INTO Product(ProdId, ProdName, Qtys, Price, Discount, Total) VALUES(7, 'G', 3, 30.00, 3.00)
+   INTO Product(ProdId, ProdName, Qtys, Price, Discount, Total) VALUES(8, 'H', 4, 40.00, 4.00)
+   INTO Product(ProdId, ProdName, Qtys, Price, Discount, Total) VALUES(9, 'I', 5, 50.00, 5.00) 
+   INTO Product(ProdId, ProdName, Qtys, Price, Discount, Total) VALUES(10, 'J', 6, 60.00, 6.00)
+   INTO Product(ProdId, ProdName, Qtys, Price, Discount, Total) VALUES(11, 'K', 7, 70.00, 7.00)  
+SELECT 1 FROM dual
+
+#QS3
+INSERT ALL 
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(12, 1, 5)
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(13, 2, 6)
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(14, 3, 7)
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(15, 4, 8)
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(16, 5, 9)
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(17, 6, 10)
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(18, 7, 11)
+   INTO Stock(StockId, FkCatagoryId, FkProdId) VALUES(19, 8, 12)
+SELECT 1 FROM dual
+
+#QS4
+SELECT * FROM Category;
+SELECT * FROM Product;
+SELECT * FROM Stock;
+
+#QV1
+SELECT c.CategoryId, c.CategoryName, SUM(p.Qtys) AS Products FROM Category c, Product p, Stock s WHERE s.FkProdId=p.ProdId AND s.FkCatagoryId=c.CategoryId GROUP BY c.CategoryName, c. CategoryId ORDER BY c. CategoryId;
+
+#QV2
+SELECT ProdId, ProdName, Total FROM Product ORDER BY Total DESC;
+
+#QV3
+SELECT s.StockId, c.CategoryName, p.ProdName, p.Total FROM Stock s, Product p, Category c WHERE p.ProdId=s.FkProdId AND s.FkCatagoryId=c.CategoryId;
+
+#QV4
+SELECT c.CategoryName, c.CategoryId, COUNT(s.StockId) AS Stock FROM Stock s, Category c WHERE s.FkCatagoryId=c.CategoryId GROUP BY c.CategoryName, c.CategoryId;
+
+#QV5
+SELECT p.ProdId, p.ProdName, d.CategoryName FROM Product p LEFT OUTER JOIN Stock s ON s.FkProdId=p.ProdId LEFT OUTER JOIN Category d ON s.FkCatagoryId=d.CategoryId ORDER BY p.Qtys;
+
+#QV6
+SELECT c.CategoryId, c.CategoryName, SUM(p.Total) AS Total FROM Category c LEFT OUTER JOIN Stock s ON s.FkCatagoryId=c.CategoryId LEFT OUTER JOIN Product p ON s.FkProdId=p.ProdId GROUP BY c.CategoryId, c.CategoryName;

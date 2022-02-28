@@ -1,0 +1,17 @@
+Q2
+SELECT a.airportName, COUNT(s.SeatId) AS Passengers FROM SeatBooking s, Airport a, Airport_Flight ar WHERE s.FkFlightId=ar.FkFlightId AND ar.FkAirportId=a.airportId GROUP BY a.airportName;
+
+Q3
+SELECT * FROM Passenger p ORDER BY p.fullName;
+
+Q4
+SELECT COUNT(s.SeatId), s.Lable FROM Passenger p, SeatBooking s, ConfirmBooking c WHERE p.passengerId=c.FkPassengerId AND c.FkSeatBookingId=s.SeatId GROUP BY s.Lable;	
+
+Q5
+SELECT a.airportName, f.FlightName, p.fullName, p.passportNumber, p.age FROM Airport a, Flight f, Passenger p, ConfirmBooking c, SeatBooking s, Airport_Flight ar WHERE p.passengerId=c.FkPassengerId AND c.FkSeatBookingId=s.SeatId AND s.FkFlightId=ar.FkFlightId AND ar.FkAirportId=a.airportId AND ar.FkFlightId=f.FlightId;
+
+Q6
+SELECT c.bookingDate, COUNT(c.Id) AS Passengers, f.flightName FROM ConfirmBooking c, Flight f, SeatBooking s WHERE c.FkSeatBookingId=s.SeatId AND s.FkFlightId=f.FlightId GROUP BY c.bookingDate, f.flightName;
+
+Q7
+select TO_CHAR(TO_DATE(extract(month from c.bookingDate), 'MM'), 'MONTH') as month, count(c.id) as bookings, f.flightName from ConfirmBooking c, SeatBooking s, Flight f WHERE c.FkSeatBookingId=s.SeatId AND s.FkFlightId=f.FlightId group by TO_CHAR(TO_DATE(extract(month from c.bookingDate), 'MM'), 'MONTH'), f.flightName;

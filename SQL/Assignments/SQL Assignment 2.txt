@@ -1,0 +1,11 @@
+Q1
+SELECT m.MenuId, m.MenuName, c.CatagoryName FROM Menu m, Catagory c WHERE c.CatId=m.FkCatagoryId;
+
+Q2
+SELECT c.CatId, c.CatagoryName, COUNT(m.MenuId) AS MenuCount FROM Catagory c, Menu m WHERE c.CatId=m.FkCatagoryId GROUP BY  c.CatId, c.CatagoryName;
+
+Q3
+SELECT o.OrderId, o.OrderDate, m.MenuName, m.Price, od.Qtys FROM Order1 o, OrderDetails od LEFT OUTER JOIN Menu m ON od.FkMenuId=m.MenuId WHERE od.FkOrderId=o.OrderId;
+
+Q4
+SELECT o.OrderDate, COUNT(distinct m.MenuName) AS MenusOrdered FROM Order1 o, Menu m, OrderDetails od WHERE o.OrderId=od.FkOrderId AND m.MenuId=od.FkMenuId GROUP BY o.OrderDate;

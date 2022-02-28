@@ -1,0 +1,214 @@
+/* Q1. Create Function to Insert BookCatagory, Author following some rules given bellow
+   a. If Id found already exist then return 'Id is duplicate. Insert Unique'
+   b. If catagoryName or AuthorName found already exist then return 'Name is dupliate. Insert unique' 
+   Otherwise execute INSERT Query on Respective table */   
+CREATE OR REPLACE FUNCTION
+SaveNewBookCatagory
+(
+    pBookCatagoryID INT,
+    pBookCatagoryName VARCHAR
+)
+RETURN VARCHAR
+AS 
+ cnt1 INT;
+ cnt2 INT;
+BEGIN
+    SELECT COUNT(BookCatagoryId) INTO cnt1 FROM BookCatagory WHERE BookCatagoryId=pBookCatagoryId;
+    SELECT COUNT(CatagoryName) INTO cnt2 FROM BookCatagory WHERE BookCatagoryId=pBookCatagoryId;
+    
+    IF cnt1>0 THEN
+        RETURN ('Book Catagory Id is duplicate. Insert Unique');    
+    ELSIF cnt2>0 THEN
+        RETURN ('Book Catagory Name is already exist. Insert Unique');    
+    ELSE
+        INSERT INTO BookCatagory VALUES(pBookCatagoryId, pBookCatagoryName);
+        RETURN ('New BookCatagory Inserted in Table');
+    END IF;
+END;
+/
+
+DECLARE
+    output_message VARCHAR(100);
+BEGIN
+    output_message := SaveNewBookCatagory(58, 'Political Book');
+    dbms_output.put_line(output_message);
+END;
+
+
+
+
+/* Q2. Create Function to Delete BookCatagory following given rules
+   a. If BookCatagoryId not exist then return 'Catagory Id not Exist'
+   b. If found then delete BookCatagory and return 'BookCatagory Delete Successfull   */
+CREATE OR REPLACE FUNCTION
+deleteBookCategory
+(
+    pBookCatagoryID INT
+)
+RETURN VARCHAR
+AS 
+ cnt1 INT;
+ cnt2 INT;
+BEGIN
+    SELECT COUNT(BookCatagoryId) INTO cnt1 FROM BookCatagory WHERE BookCatagoryId=pBookCatagoryId;
+    
+    IF cnt1<1 THEN
+        RETURN ('Catagory Id not Exist');
+    ELSE
+        DELETE FROM BookCatagory WHERE BookCatagoryId= pBookCatagoryID;
+        RETURN ('BookCatagory Delete Successfull');
+    END IF;
+END;
+/
+DECLARE
+    output_message VARCHAR(100);
+BEGIN
+    output_message := deleteBookCategory(58);
+    dbms_output.put_line(output_message);
+END;
+
+
+
+
+/* Q3. Create Function to Compare get Count of Number of Books written by each other and return Author Name who wrote max number of Books From 
+       the function */
+CREATE OR REPLACE FUNCTION
+countAuthorBooks
+RETURN VARCHAR
+AS 
+ author VARCHAR(123);
+BEGIN
+    --SELECT COUNT(BookCatagoryId) INTO cnt1 FROM BookCatagory WHERE BookCatagoryId=pBookCatagoryId;
+    SELECT a.AuthorName INTO author FROM Author a, Book b WHERE b.FkAuthorId=a.AuthorId GROUP BY a.AuthorName ORDER BY (COUNT(b.BookId)) FETCH FIRST 1 ROWS ONLY;
+    RETURN (author);
+END;
+/
+
+DECLARE
+    output_message VARCHAR(100);
+BEGIN
+    output_message := countAuthorBooks;
+    dbms_output.put_line(output_message);
+END;
+
+
+
+
+/* Q4. Create Function to return Name of Book Which written by pAuthorName where pAuthorName is argument in Function */
+CREATE OR REPLACE FUNCTION
+countAuthorBooks
+(
+    pAuthorName VARCHAR
+)
+RETURN VARCHAR
+AS 
+ book VARCHAR(123);
+BEGIN
+    --SELECT COUNT(BookCatagoryId) INTO cnt1 FROM BookCatagory WHERE BookCatagoryId=pBookCatagoryId;
+    SELECT b.BookName INTO book FROM Author a, Book b WHERE a.AuthorName=author AND a.AuthorId=b.FkAuthorId;
+    RETURN (book);
+END;
+/
+
+DECLARE
+    output_message VARCHAR(100);
+BEGIN
+    output_message := countAuthorBooks('Leo Tosstoy');
+    dbms_output.put_line(output_message);
+END;
+
+
+
+
+/* Q5. Create Function to return Count of Books Which belongs to pBookCatagory Where pBookCatagory is argument to Function */
+CREATE OR REPLACE FUNCTION
+countOfBooks
+(
+    pBookCatagory VARCHAR
+)
+RETURN INT
+AS 
+ counts INT;
+BEGIN
+    SELECT COUNT(b.BookId) INTO counts FROM Book b, BookCatagory c WHERE c.CatagoryName=pBookCatagory AND c.BookCatagoryId=b.FkBookCatagoryId;
+    RETURN (counts);
+END;
+/
+
+DECLARE
+    output_message VARCHAR(100);
+BEGIN
+    output_message := countOfBooks('Fantasy');
+    dbms_output.put_line(output_message);
+END;
+
+
+
+
+/* Q6. Define PL/SQL Function that return count of authors who dont have books mapped in Books Table */
+CREATE OR REPLACE FUNCTION
+countOfNoMapAuthors
+RETURN INT
+AS 
+ counts INT;
+ temp INT;
+BEGIN
+    SELECT COUNT(a.AuthorId) INTO temp FROM Author a;
+    SELECT COUNT(a.AuthorId) INTO counts FROM Author a, Book b WHERE b.FkAuthorId=a.AuthorId;
+    RETURN (temp-counts);
+END;
+/
+
+DECLARE
+    output_message VARCHAR(100);
+BEGIN
+    output_message := countOfNoMapAuthors;
+    dbms_output.put_line(output_message);
+END;
+
+
+
+
+/* Q7. Define PL/SQL Function to insert Book following given rules
+   a. BookId, BookName are the mandetory fields if they are empty then return 'Mandetory Fields are missing.'
+   b. pBookCatagoryId Must be exist in BookCatagoryTable, If not then return pBookCatagoryId || ' not exist.'
+   c. pAuthorId Must be exist in Author Table, If not then return pAuthorId || ' not exist'
+   d. In Case pBookCatagoryId or pAuthorId is empty then return 'Book Record created without Catagory and Author'
+      otherwise return 'Book Records Created with all mandetory and required Details'   */
+CREATE OR REPLACE FUNCTION
+insertRules
+(
+BookId INT DEFAULT NULL,
+BookName VARCHAR DEFAULT NULL,
+pBookCatagoryId INT,
+pAuthorId INT
+)
+RETURN VARCHAR
+AS 
+ countsId INT;
+ temp INT;
+BEGIN
+    SELECT COUNT(BookCatagoryId) INTO countsId FROM BookCatagory WHERE BookCatagoryId=pBookCatagoryId;
+    SELECT COUNT(AuthorId) INTO temp FROM Author WHERE AuthorId=pAuthorId;
+    IF BookName IS NULL OR BookId is NULL THEN
+        RETURN ('Mandetory Fields are missing.');    
+    ELSIF countsId<1 AND pBookCatagoryId IS NOT NULL THEN
+        RETURN (CONCAT(pBookCatagoryId, ' not exist.'));
+    ELSIF temp<1 AND pAuthorId IS NOT NULL THEN
+        RETURN (CONCAT(pAuthorId, ' not exist.'));
+    ELSIF pBookCatagoryId IS NULL OR pAuthorId IS NULL THEN
+        INSERT INTO Book VALUES(BookId, BookName, pBookCatagoryId, pAuthorId);
+        RETURN ('Book Record created without Catagory and Author');
+    ELSE
+        INSERT INTO Book VALUES(BookId, BookName, pBookCatagoryId, pAuthorId);
+        RETURN ('Book Records Created with all mandetory and required Details');
+    END IF;
+END;
+/
+
+DECLARE
+    output_message VARCHAR(100);
+BEGIN
+    output_message := insertRules(12, 'D', 57, 811);
+    dbms_output.put_line(output_message);
+END;
